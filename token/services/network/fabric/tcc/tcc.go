@@ -115,6 +115,8 @@ func (cc *TokenChaincode) Invoke(stub shim.ChaincodeStubInterface) (res pb.Respo
 		logger.Infof("running function [%s]", string(args[0]))
 		switch f := string(args[0]); f {
 		case InvokeFunction:
+			logger.Infof("running args: invoke")
+
 			if len(args) != 1 {
 				return shim.Error("empty token request")
 			}
@@ -127,15 +129,22 @@ func (cc *TokenChaincode) Invoke(stub shim.ChaincodeStubInterface) (res pb.Respo
 			if !ok {
 				return shim.Error("failed getting token request, entry not found")
 			}
+
+			logger.Infof("[in case invoice] token request: %s", string(tokenRequest))
+
 			return cc.ProcessRequest(tokenRequest, stub)
 		case QueryPublicParamsFunction:
+			logger.Infof("running args: queryPublicParams")
 			return cc.QueryPublicParams(stub)
 		case QueryTokensFunctions:
+			logger.Infof("running args: queryTokens")
+
 			if len(args) != 2 {
 				return shim.Error("request to retrieve tokens is empty")
 			}
 			return cc.QueryTokens(args[1], stub)
 		case AreTokensSpent:
+			logger.Infof("running args: areTokensSpent")
 			if len(args) != 2 {
 				return shim.Error("request to check if tokens are spent is empty")
 			}
@@ -165,6 +174,8 @@ func (cc *TokenChaincode) Params(builtInParams string) ([]byte, error) {
 }
 
 func (cc *TokenChaincode) GetValidator(builtInParams string) (Validator, error) {
+	logger.Infof("call func GetValidator...")
+
 	var firstInitError error
 	cc.initOnce.Do(func() {
 		if err := cc.Initialize(builtInParams); err != nil {
@@ -179,6 +190,7 @@ func (cc *TokenChaincode) GetValidator(builtInParams string) (Validator, error) 
 }
 
 func (cc *TokenChaincode) Initialize(builtInParams string) error {
+	logger.Infof("call func initialize...")
 	logger.Infof("reading public parameters...")
 
 	ppRaw, err := cc.Params(builtInParams)
@@ -186,7 +198,7 @@ func (cc *TokenChaincode) Initialize(builtInParams string) error {
 		return errors.WithMessagef(err, "failed reading public parameters")
 	}
 
-	logger.Infof("[TokenChaincode.Initialize] ppRaw: %s", string(ppRaw))
+	logger.Infof("[TokenChaincode.Initialize] ppRaw in zkatlog_pp.json")
 
 	logger.Infof("instantiate public parameter manager and validator...")
 	ppm, validator, err := cc.TokenServicesFactory(ppRaw)
@@ -220,6 +232,8 @@ func (cc *TokenChaincode) ReadParamsFromFile() string {
 }
 
 func (cc *TokenChaincode) ProcessRequest(raw []byte, stub shim.ChaincodeStubInterface) pb.Response {
+	logger.Infof("call func ProcessRequest...")
+	logger.Infof("raw data: %s", string(raw))
 	validator, err := cc.GetValidator(Params)
 	if err != nil {
 		return shim.Error(err.Error())
@@ -287,6 +301,8 @@ func (cc *TokenChaincode) QueryTokens(idsRaw []byte, stub shim.ChaincodeStubInte
 }
 
 func (cc *TokenChaincode) AreTokensSpent(idsRaw []byte, stub shim.ChaincodeStubInterface) pb.Response {
+	logger.Infof("call func AreTokensSpent...")
+	logger.Infof("idsRaw: %s", string(idsRaw))
 	_, err := cc.GetValidator(Params)
 	if err != nil {
 		return shim.Error(err.Error())
