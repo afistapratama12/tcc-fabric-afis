@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"os"
 	"runtime/debug"
+	"strings"
 	"sync"
 
 	"github.com/hyperledger-labs/fabric-smart-client/platform/view/services/flogging"
@@ -99,6 +100,14 @@ func (cc *TokenChaincode) Invoke(stub shim.ChaincodeStubInterface) (res pb.Respo
 	}()
 
 	args := stub.GetArgs()
+
+	argStrs := make([]string, len(args))
+	for i, arg := range args {
+		argStrs[i] = string(arg)
+	}
+
+	logger.Infof("[TokenChaincode.Invoke] get args %s", strings.Join(argStrs, ", "))
+
 	switch l := len(args); l {
 	case 0:
 		return shim.Error("missing parameters")
@@ -176,6 +185,8 @@ func (cc *TokenChaincode) Initialize(builtInParams string) error {
 	if err != nil {
 		return errors.WithMessagef(err, "failed reading public parameters")
 	}
+
+	logger.Infof("[TokenChaincode.Initialize] ppRaw: %s", string(ppRaw))
 
 	logger.Infof("instantiate public parameter manager and validator...")
 	ppm, validator, err := cc.TokenServicesFactory(ppRaw)
