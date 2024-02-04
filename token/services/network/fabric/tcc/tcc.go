@@ -155,6 +155,7 @@ func (cc *TokenChaincode) Invoke(stub shim.ChaincodeStubInterface) (res pb.Respo
 	}
 }
 
+// -------------- func helper ---------------
 func (cc *TokenChaincode) Params(builtInParams string) ([]byte, error) {
 	params := cc.ReadParamsFromFile()
 	if params == "" {
@@ -192,6 +193,7 @@ func (cc *TokenChaincode) GetValidator(builtInParams string) (Validator, error) 
 func (cc *TokenChaincode) Initialize(builtInParams string) error {
 	logger.Infof("call func initialize...")
 	logger.Infof("reading public parameters...")
+	logger.Infof("Initialize func param builtInParams: %s", builtInParams)
 
 	ppRaw, err := cc.Params(builtInParams)
 	if err != nil {
@@ -329,3 +331,5 @@ func (cc *TokenChaincode) AreTokensSpent(idsRaw []byte, stub shim.ChaincodeStubI
 	}
 	return shim.Success(raw)
 }
+
+// -------------- end func helper ---------------
